@@ -5139,7 +5139,7 @@ function showLineMenu(di){
       style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer;border-right:1px solid rgba(255,255,255,.15)">
       ${bm?'🔖✓':'🔖'} Marque
     </button>
-    <button onclick="openNote(${di});$('line-menu')?.remove()"
+    <button onclick="$('line-menu')?.remove();setTimeout(()=>openNote(${di}),50)"
       style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer;border-right:1px solid rgba(255,255,255,.15)">
       📝 Note
     </button>
