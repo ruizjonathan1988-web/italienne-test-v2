@@ -2293,6 +2293,8 @@ function renderContent(){
   $('script-view').style.display=kar?'none':'block';
   // Le scrubber fixed est géré par .visible dans showScreen — ne pas toucher style.display
   $('scene-nav-bar').style.display='flex';
+  $('scene-bar-new').style.display='flex';
+  $('scene-nav-bar').style.display='none';
   $('karaoke-view').classList.toggle('show',kar);
   if(kar)renderKaraoke();
   else{renderScript();renderScrubber();updateScrubberCursor();scrollToCur();updateSceneHighlight();}
