@@ -5145,25 +5145,25 @@ function showLineMenu(di){
       <div style="padding:14px 14px 18px;display:flex;flex-direction:column;gap:8px">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           <button onclick="toggleBookmark(${di});$('line-menu')?.remove()"
-            style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:${bm?'#8A1818':'#EBE3D4'};border:none;cursor:pointer">
-            <span style="font-size:1.4rem">🔖</span>
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 8px;border-radius:14px;background:${bm?'#8A1818':'#EBE3D4'};border:none;cursor:pointer">
+            <span style="font-size:1.8rem">🔖</span>
             <span style="font-family:'Courier Prime',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:${bm?'#F4EEE4':'#18120A'}">${bm?'Marqué':'Marquer'}</span>
           </button>
           <button onclick="$('line-menu')?.remove();setTimeout(()=>openNote(${di}),50)"
             style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:#EBE3D4;border:none;cursor:pointer">
-            <span style="font-size:1.4rem">📝</span>
+            <span style="font-size:1.8rem">📝</span>
             <span style="font-family:'Courier Prime',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#18120A">Note</span>
           </button>
           <button onclick="hearLine(${di});$('line-menu')?.remove()"
             style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:#EBE3D4;border:none;cursor:pointer">
-            <span style="font-size:1.4rem">🔊</span>
+            <span style="font-size:1.8rem">🔊</span>
             <span style="font-family:'Courier Prime',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#18120A">Écouter</span>
           </button>
         </div>
         <button onclick="jumpLine(${di});$('line-menu')?.remove()"
-          style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#EBE3D4;border-radius:10px;border:none;cursor:pointer;width:100%">
+          style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:#EBE3D4;border-radius:10px;border:none;cursor:pointer;width:100%">
           <span style="font-size:1rem">▶</span>
-          <span style="font-family:'IM Fell English',serif;font-size:.9rem;color:#18120A;flex:1;text-align:left">Reprendre depuis ici</span>
+          <span style="font-family:'IM Fell English',serif;font-size:.1rem;color:#18120A;flex:1;text-align:left">Reprendre depuis ici</span>
           <span style="font-family:'Courier Prime',monospace;font-size:.65rem;color:#7A6248">${esc(sc?.title?.split(':')[0]||'')}</span>
         </button>
         <div style="text-align:center;padding:4px 0 2px;cursor:pointer" onclick="$('line-menu')?.remove()">
