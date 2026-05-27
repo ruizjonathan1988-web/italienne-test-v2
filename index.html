@@ -3413,7 +3413,7 @@ function jeuDistractors(correctWord){
   const initial = jeuNorm(correctWord[0]);
   const pool = JEU.lines
     .flatMap(l => l.text.split(/\s+/))
-    .map(w => w.replace(/[^a-zA-ZÀ-ÿ''-]/g,'').replace(/['''-].*$/,'')) // garder la partie avant apostrophe
+    .map(w => w.replace(/[^a-zA-ZÀ-ÿ]/g,''))
     .filter(w =>
       w.length > 1 &&
       jeuNorm(w[0]) === initial &&
@@ -3421,13 +3421,8 @@ function jeuDistractors(correctWord){
     );
   const shuffled = [...new Set(pool)].sort(()=>Math.random()-.5);
   const result = shuffled.slice(0,2);
-  // Fallback si pas assez de mots avec même initiale
   while(result.length < 2){
-    result.push(letter => letter + '———');
-    // fallback simple : lettre + tirets
-    const fb = initial.toUpperCase() + '—'.repeat(3);
-    if(!result.includes(fb)) result.push(fb);
-    else result.push(initial.toUpperCase() + '——');
+    result.push(initial.toUpperCase() + '—'.repeat(3-result.length));
   }
   return result.slice(0,2);
 }
@@ -4810,7 +4805,7 @@ function renderMarques(tab){
       return`<div style="padding:.55rem .9rem;border-bottom:1px solid var(--line-l);cursor:pointer;display:flex;align-items:flex-start;gap:.5rem" onclick="switchTab('texte');jumpLine(${di})">
         <div style="flex:1">
           <div style="font-size:.68rem;color:var(--ink-4);font-family:'Courier Prime',monospace;margin-bottom:.15rem">${esc(sc?.title||'')}</div>
-          <div style="font-size:.82rem;font-weight:bold;color:${roleMap[d.role]||C.red};font-family:'IM Fell English',serif;margin-bottom:.15rem">${esc(d.role)}</div>
+          <div style="font-size:.82rem;font-weight:bold;color:${roleMap[d.role]||'var(--red)'};font-family:'IM Fell English',serif;margin-bottom:.15rem">${esc(d.role)}</div>
           <div style="font-size:.85rem;color:var(--ink-2);font-family:'IM Fell English',serif;font-style:italic">«${esc(d.text.slice(0,55))}${d.text.length>55?'…':''}»</div>
         </div>
         <span style="color:var(--ink-4);font-size:.9rem">›</span>
