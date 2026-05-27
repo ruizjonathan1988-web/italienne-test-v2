@@ -2364,7 +2364,10 @@ function renderScript(){
     // Note border
     const noteBorder=note&&note.color?`border-left-color:${note.color}!important`:'' ;
     const cls=['s-line',cur?'current':'',isMe?'is-me':'',bm?'bookmarked':'',note?'has-note':''].filter(Boolean).join(' ');
-    html+=`<div class="${cls}" id="sl-${di}" data-di="${di}" onclick="jumpLine(${di})" ${note?`style="${noteBorder}"`:''}>
+    html+=`<div class="${cls}" id="sl-${di}" data-di="${di}" onclick="jumpLine(${di})"
+         ontouchstart="this._lpt=Date.now()"
+         ontouchend="if(Date.now()-this._lpt>500){event.preventDefault();showLineMenu(${di});}"
+          oncontextmenu="event.preventDefault();showLineMenu(${di})" ${note?`style="${noteBorder}"`:''}>
       <div class="s-role" style="color:${color}">${esc(line.role)}</div>
       ${noteDot}${textHtml}</div>`;
   });
@@ -2667,28 +2670,26 @@ function resetHeader(){
   if(S.play){
     const hd = $('play-title-hd');
     hd.innerHTML = S.play.title + (S.play.author ? ' — '+S.play.author : '');
-    // Supprimer tout speaking-ind résiduel (sécurité)
     const oldSpk = hd.querySelector('.speaking-ind');
     if(oldSpk) oldSpk.remove();
   }
 }
-function hearLine(){
-  const cur=S.dialogues[S.lineIdx];if(!cur)return;
+function hearLine(di){
+  const cur=S.dialogues[di!==undefined?di:S.lineIdx];
+  if(!cur)return;
   const wasPlaying=S.isPlaying;
   S.isPlaying=false;
   TTS.stop();clearSouffleur();
-  $('bb-play').classList.remove('active');$('bb-play').textContent='▶';
+  const bp=$('bb-play');if(bp){bp.classList.remove('active');bp.textContent='▶';}
   setHeaderSpeaking(cur.role);
   TTS.speakRole(cur.text,cur.role,{onend:()=>{
     resetHeader();
-    // Si on était en mode auto-play, on signale que c'est à l'utilisateur de continuer
     if(wasPlaying&&!['lecture','masquer','karaoke'].includes(S.mode)){
       setHeaderMyTurn('▶ pour continuer');
       S._myTurnPending=true;
     }
   }});
 }
-
 // ════ MASQUER / SOUFFLEUR ════
 function revealCurrent(){toggleReveal(S.lineIdx);}
 function revealLine(di){
@@ -2855,8 +2856,6 @@ function renderTextWithHighlights(text, di, forSearch){
     let display = esc(token);
     if(re){ re.lastIndex=0; display = display.replace(re, '<mark>$1</mark>'); }
     return `<span class="${isHL?'hl-word':''}" data-di="${di}" data-wi="${wi}"
-      ontouchstart="this._hlt=Date.now()"
-      ontouchend="if(Date.now()-this._hlt>380){event.preventDefault();toggleWordHL(${di},${wi});}"
       >${display}</span>`;
   }).join('');
 }
@@ -3066,27 +3065,26 @@ async function getSessionStats(playId){
 }
 
 // ════ BOOKMARKS ════
-async function toggleBookmark(){
+async function toggleBookmark(di){
+  if(di===undefined)di=S.lineIdx;
   if(!S.play||!S.dialogues.length)return;
-  const idx=S.lineIdx;
-  const cur=S.dialogues[idx];
-  if(S.bookmarks.has(idx)){
-    S.bookmarks.delete(idx);
-    await DB.del('bookmarks',`${S.play.id}_${idx}`);
+  const cur=S.dialogues[di];
+  if(S.bookmarks.has(di)){
+    S.bookmarks.delete(di);
+    await DB.del('bookmarks',`${S.play.id}_${di}`);
     toast('Marque-page retiré');
   } else {
-    S.bookmarks.add(idx);
-    // Stocker role+snippet de texte pour remapage robuste après édition
+    S.bookmarks.add(di);
     await DB.put('bookmarks',{
-      id:`${S.play.id}_${idx}`,
+      id:`${S.play.id}_${di}`,
       playId:S.play.id,
-      lineIdx:idx,
+      lineIdx:di,
       role:cur?.role||'',
       snippet:(cur?.text||'').slice(0,40),
     });
     toast('🔖 Marque-page posé');
   }
-  const el=$('sl-'+idx);if(el)el.classList.toggle('bookmarked',S.bookmarks.has(idx));
+  const el=$('sl-'+di);if(el)el.classList.toggle('bookmarked',S.bookmarks.has(di));
 }
 
 // Charger les bookmarks en remappant les index si le script a été édité
@@ -5120,6 +5118,45 @@ function setModeFromSettings(modeId){
   setMode(modeId);
   // Aller dans l'onglet texte
   switchTab('texte');
+}
+
+// ════ MENU CONTEXTUEL RÉPLIQUE ════
+function showLineMenu(di){
+  // Supprimer ancien menu si existe
+  $('line-menu')?.remove();
+  const d=S.dialogues[di];if(!d)return;
+  const el=$('sl-'+di);if(!el)return;
+  const rect=el.getBoundingClientRect();
+  const menu=document.createElement('div');
+  menu.id='line-menu';
+  menu.style.cssText=`position:fixed;left:${Math.min(rect.left+8,window.innerWidth-180)}px;top:${rect.top-48}px;
+    background:var(--ink);color:var(--paper);border-radius:4px;
+    display:flex;gap:0;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.35);
+    font-family:'Courier Prime',monospace;font-size:.75rem;overflow:hidden`;
+  const bm=S.bookmarks.has(di);
+  menu.innerHTML=`
+    <button onclick="toggleBookmark(${di});$('line-menu')?.remove()" 
+      style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer;border-right:1px solid rgba(255,255,255,.15)">
+      ${bm?'🔖✓':'🔖'} Marque
+    </button>
+    <button onclick="openNote(${di});$('line-menu')?.remove()"
+      style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer;border-right:1px solid rgba(255,255,255,.15)">
+      📝 Note
+    </button>
+    <button onclick="hearLine(${di});$('line-menu')?.remove()"
+      style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer">
+      🔊 Écouter
+    </button>`;
+  document.body.appendChild(menu);
+  // Fermer si on tape ailleurs
+  setTimeout(()=>{
+    document.addEventListener('touchstart',function close(e){
+      if(!e.target.closest('#line-menu')){$('line-menu')?.remove();document.removeEventListener('touchstart',close);}
+    });
+    document.addEventListener('click',function close(e){
+      if(!e.target.closest('#line-menu')){$('line-menu')?.remove();document.removeEventListener('click',close);}
+    });
+  },100);
 }
 
 // ════ PWA + INIT ════
