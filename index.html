@@ -2563,7 +2563,7 @@ function startAutoChainCountdown(onDone){
 function _pauseMyTurn(afterPending,msg){
   S.isPlaying=false;
   TTS.stop();
-  $('bb-play').classList.remove('active');$('bb-play').textContent='▶';
+  const bp=$('bb-play');if(bp){bp.classList.remove('active');bp.textContent='▶';}
   S._myTurnPending=true;
   S._afterPending=!!afterPending;
   setHeaderMyTurn(msg);
