@@ -2258,8 +2258,9 @@ function _nav(){
 function scrollToCur(){requestAnimationFrame(()=>{const el=$('sl-'+S.lineIdx);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});});}
 function highlightCurrent(){document.querySelectorAll('.s-line').forEach(el=>el.classList.toggle('current',parseInt(el.dataset.di)===S.lineIdx));}
 function updateProg(){
-  if(!S.dialogues.length){$('bb-progress').textContent='—';return;}
-  $('bb-progress').textContent=`${S.lineIdx+1}/${S.dialogues.length}`;
+  const el=$('bb-progress');
+  if(!S.dialogues.length){if(el)el.textContent='—';return;}
+  if(el)el.textContent=`${S.lineIdx+1}/${S.dialogues.length}`;
 }
 let _saveProgT=null;
 async function savePos(){
@@ -2480,15 +2481,14 @@ function _advanceAndPlay(){
 
 function startPlay(){
   S.isPlaying=true;
-  $('bb-play').classList.add('active');$('bb-play').textContent='⏸';
+  const bp=$('bb-play');if(bp){bp.classList.add('active');bp.textContent='⏸';}
   playStep();
   updateFabPlay();
 }
-
 function stopAll(){
   S.isPlaying=false;
   TTS.stop();clearSouffleur();clearAutoChainCountdown();
-  $('bb-play').classList.remove('active');$('bb-play').textContent='▶';
+  const bp=$('bb-play');if(bp){bp.classList.remove('active');bp.textContent='▶';}
   resetHeader();
   updateFabPlay();
 }
