@@ -5122,41 +5122,58 @@ function setModeFromSettings(modeId){
 
 // ════ MENU CONTEXTUEL RÉPLIQUE ════
 function showLineMenu(di){
-  // Supprimer ancien menu si existe
   $('line-menu')?.remove();
   const d=S.dialogues[di];if(!d)return;
   const el=$('sl-'+di);if(!el)return;
-  const rect=el.getBoundingClientRect();
-  const menu=document.createElement('div');
-  menu.id='line-menu';
-  menu.style.cssText=`position:fixed;left:${Math.min(rect.left+8,window.innerWidth-180)}px;top:${rect.top-48}px;
-    background:var(--ink);color:var(--paper);border-radius:4px;
-    display:flex;gap:0;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.35);
-    font-family:'Courier Prime',monospace;font-size:.75rem;overflow:hidden`;
+  const roleColor=S.play?.roles.find(r=>r.name===d.role)?.color||'#A87020';
   const bm=S.bookmarks.has(di);
-  menu.innerHTML=`
-    <button onclick="toggleBookmark(${di});$('line-menu')?.remove()" 
-      style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer;border-right:1px solid rgba(255,255,255,.15)">
-      ${bm?'🔖✓':'🔖'} Marque
-    </button>
-    <button onclick="$('line-menu')?.remove();setTimeout(()=>openNote(${di}),50)"
-      style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer;border-right:1px solid rgba(255,255,255,.15)">
-      📝 Note
-    </button>
-    <button onclick="hearLine(${di});$('line-menu')?.remove()"
-      style="background:none;border:none;color:var(--paper);padding:.5rem .7rem;cursor:pointer">
-      🔊 Écouter
-    </button>`;
-  document.body.appendChild(menu);
-  // Fermer si on tape ailleurs
-  setTimeout(()=>{
-    document.addEventListener('touchstart',function close(e){
-      if(!e.target.closest('#line-menu')){$('line-menu')?.remove();document.removeEventListener('touchstart',close);}
-    });
-    document.addEventListener('click',function close(e){
-      if(!e.target.closest('#line-menu')){$('line-menu')?.remove();document.removeEventListener('click',close);}
-    });
-  },100);
+  const sc=S.play?.scenes.find(s=>s.idx===d.scIdx);
+
+  const overlay=document.createElement('div');
+  overlay.id='line-menu';
+  overlay.style.cssText=`position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to bottom,rgba(24,18,10,0) 0%,rgba(24,18,10,.5) 100%)`;
+
+  overlay.innerHTML=`
+    <div style="background:#F4EEE4;border-radius:20px 20px 0 0;overflow:hidden;animation:slideUp .22s ease">
+      <div style="background:#18120A;padding:14px 18px 16px">
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px 3px 6px;margin-bottom:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${roleColor};flex-shrink:0"></div>
+          <span style="font-family:'Courier Prime',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:#F4EEE4">${esc(d.role)} · réplique ${di}</span>
+        </div>
+        <div style="font-family:'IM Fell English',serif;font-style:italic;font-size:.8rem;color:rgba(244,238,228,.7);line-height:1.5">«&nbsp;${esc(d.text.slice(0,60))}${d.text.length>60?'…':''}&nbsp;»</div>
+      </div>
+      <div style="padding:14px 14px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <button onclick="toggleBookmark(${di});$('line-menu')?.remove()"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:${bm?'#8A1818':'#EBE3D4'};border:none;cursor:pointer">
+            <span style="font-size:1.4rem">🔖</span>
+            <span style="font-family:'Courier Prime',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:${bm?'#F4EEE4':'#18120A'}">${bm?'Marqué':'Marquer'}</span>
+          </button>
+          <button onclick="$('line-menu')?.remove();setTimeout(()=>openNote(${di}),50)"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:#EBE3D4;border:none;cursor:pointer">
+            <span style="font-size:1.4rem">📝</span>
+            <span style="font-family:'Courier Prime',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#18120A">Note</span>
+          </button>
+          <button onclick="hearLine(${di});$('line-menu')?.remove()"
+            style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:#EBE3D4;border:none;cursor:pointer">
+            <span style="font-size:1.4rem">🔊</span>
+            <span style="font-family:'Courier Prime',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#18120A">Écouter</span>
+          </button>
+        </div>
+        <button onclick="jumpLine(${di});$('line-menu')?.remove()"
+          style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#EBE3D4;border-radius:10px;border:none;cursor:pointer;width:100%">
+          <span style="font-size:1rem">▶</span>
+          <span style="font-family:'IM Fell English',serif;font-size:.9rem;color:#18120A;flex:1;text-align:left">Reprendre depuis ici</span>
+          <span style="font-family:'Courier Prime',monospace;font-size:.65rem;color:#7A6248">${esc(sc?.title?.split(':')[0]||'')}</span>
+        </button>
+        <div style="text-align:center;padding:4px 0 2px;cursor:pointer" onclick="$('line-menu')?.remove()">
+          <span style="font-family:'Courier Prime',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:#AE9A80">— Annuler —</span>
+        </div>
+      </div>
+    </div>`;
+
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
 }
 
 // ════ PWA + INIT ════
