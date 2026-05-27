@@ -2192,7 +2192,7 @@ function setMode(m){
   $('sb-blanc').style.display=m==='blanc'?'block':'none';
   if(m==='blanc'){updateBlancDisplay();}
 }
-function updateBottomBar(){$('bb-reveal').style.display=['masquer','souffleur'].includes(S.mode)?'flex':'none';}
+function updateBottomBar(){const el=$('bb-reveal');if(el)el.style.display=['masquer','souffleur'].includes(S.mode)?'flex':'none';}
 
 // ════ NAVIGATION ════
 // Historique de navigation pour mode aléatoire
