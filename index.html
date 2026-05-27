@@ -2102,6 +2102,8 @@ function updateSceneHighlight(){
   });
   const sc=S.play?.scenes.find(s=>s.idx===cur);
   $('scene-nav-title').textContent=sc?.title||'';
+  const sbt=$('scene-bar-title');
+  if(sbt)sbt.textContent=sc?.title||'Scène '+(cur+1);
 }
 function isMyLine(role){return S.myRoles.includes(role);}
 function renderRoles(){
