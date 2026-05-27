@@ -3274,7 +3274,7 @@ async function saveEditor(){
     loading(false);await openPlay(updated.id);toast(`✓ ${dlg} répliques · ${updated.roles.length} perso`);
   }catch(e){loading(false);toast('Erreur : '+e.message);}
 }
-$('btn-editor-back').addEventListener('click',()=>{if(S.play)showScreen('play');closeSidebar(); else showScreen('library');});
+$('btn-editor-back').addEventListener('click',()=>{if(S.play){showScreen('play');closeSidebar();}else showScreen('library');});
 $('btn-quiz-back').addEventListener('click',()=>{TTS.stop();showScreen(S.play?'play':'library');});
 $('btn-fil-back').addEventListener('click',()=>{showScreen(S.play?'play':'library');});
 $('btn-enreg-back').addEventListener('click',()=>{showScreen(S.play?'play':'library');});
