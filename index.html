@@ -738,7 +738,7 @@ body.has-tabs .play-header{padding:.35rem .68rem}
 <!-- ══ IMPORT ══ -->
 <div id="screen-import" class="screen">
   <div class="app-header">
-    <button class="icon-btn" onclick="showScreen('library')">←</button>
+    <button class="icon-btn" onclick="switchTab('texte')">←</button>
     <h1>Importer un script</h1>
   </div>
   <div class="import-body">
@@ -955,7 +955,7 @@ body.has-tabs .play-header{padding:.35rem .68rem}
 <!-- ══ MARQUES ══ -->
 <div id="screen-marques" class="screen">
   <div class="app-header">
-    <button class="icon-btn" onclick="showScreen('library')">←</button>
+<button class="icon-btn" onclick="switchTab('texte')">←</button>
     <h1 style="font-size:.95rem;flex:1" id="marques-title">Marque-pages</h1>
   </div>
   <div class="settings-tabs">
@@ -968,7 +968,7 @@ body.has-tabs .play-header{padding:.35rem .68rem}
 <!-- ══ RÉGLAGES ══ -->
 <div id="screen-reglages" class="screen">
   <div class="app-header">
-    <button class="icon-btn" onclick="showScreen('library')">←</button>
+    <button class="icon-btn" onclick="switchTab('texte')">←</button>
     <h1 style="font-size:.95rem;flex:1">Réglages</h1>
   </div>
   <div class="settings-tabs">
@@ -4916,6 +4916,7 @@ function renderSettingsTab(tab){
       <div class="settings-section-label">Ma réplique (italienne)</div>
       <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.4rem">
         <div class="settings-row-label">Lire mes répliques</div>
+        <div class="settings-row-sub" style="margin-bottom:.35rem">Écoutez vos répliques avant ou après les avoir dites.</div>
         <div class="segment" style="width:100%">
           ${['skip','before','after','before_after'].map((v,i)=>`
             <div class="seg-opt ${S.myLineBehavior===v?'active':''}"
@@ -4927,12 +4928,22 @@ function renderSettingsTab(tab){
 
       <div class="settings-section-label">Lecture automatique</div>
       <div class="settings-row">
+        <div class="settings-row">
         <div class="settings-row-info">
           <div class="settings-row-label">Enchaîner automatiquement</div>
-          <div class="settings-row-sub">Passe à la suivante après ta réplique</div>
+          <div class="settings-row-sub">Une fois le délai écoulé, passer automatiquement à la suivante.</div>
         </div>
-        <div class="sw ${S.autoChain?'on':'off'}" onclick="toggleAutoChain()"></div>
+        <div class="sw ${S.autoChain?'on':'off'}" onclick="toggleAutoChain();renderSettingsTab('session')"></div>
       </div>
+      ${S.autoChain?`
+      <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.3rem">
+        <div class="settings-row-label">Délai pour réciter ma réplique</div>
+        <div class="settings-row-sub">Réduisez le délai pour accélérer la répétition.</div>
+        <input type="range" min="0.5" max="3" step="0.1" value="${$('autochain-delay')?.value||1}"
+          oninput="if($('autochain-delay'))$('autochain-delay').value=this.value;if($('acd-val'))$('acd-val').textContent=parseFloat(this.value).toFixed(1)+'×'"
+          style="width:100%;accent-color:var(--red)">
+        <div style="font-family:'Courier Prime',monospace;font-size:.68rem;color:var(--ink-3);text-align:center;width:100%">${parseFloat($('autochain-delay')?.value||1)<1?'Court':parseFloat($('autochain-delay')?.value||1)>2?'Long':'Moyen'}</div>
+      </div>`:''}
       <div class="settings-row">
         <div class="settings-row-info">
           <div class="settings-row-label">Boucle</div>
