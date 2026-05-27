@@ -638,7 +638,7 @@ body.dark-mode .souffleur-hint{background:#2A2420}
   border-bottom:2px solid transparent;transition:all .15s;
 }
 .settings-tab.active{color:var(--red);border-bottom-color:var(--red)}
-.settings-body{flex:1;overflow-y:auto;padding:.6rem .9rem 5rem;display:flex;flex-direction:column}
+.settings-body{flex:1;overflow-y:auto;padding:.6rem .9rem 5rem}
 .settings-body::-webkit-scrollbar{display:none}
 .settings-section-label{
   font-family:'Courier Prime',monospace;font-size:.62rem;
@@ -646,9 +646,11 @@ body.dark-mode .souffleur-hint{background:#2A2420}
   margin:.8rem 0 .4rem;display:flex;align-items:center;gap:.45rem;
 }
 .settings-section-label::after{content:'';flex:1;height:1px;background:var(--line-l)}
+.settings-section-label{display:block;width:100%}
 .settings-row{
   display:flex;align-items:center;justify-content:space-between;
   padding:.42rem 0;border-bottom:1px solid var(--line-l);
+  width:100%;
 }
 .settings-row-info{flex:1}
 .settings-row-label{font-family:'IM Fell English',serif;font-size:.9rem;color:var(--ink)}
@@ -4926,9 +4928,8 @@ function renderSettingsTab(tab){
         </div>
       </div>
 
-      <div class="settings-section-label">Lecture automatique</div>
+  <div class="settings-section-label">Lecture automatique</div>
       <div class="settings-row">
-        <div class="settings-row">
         <div class="settings-row-info">
           <div class="settings-row-label">Enchaîner automatiquement</div>
           <div class="settings-row-sub">Une fois le délai écoulé, passer automatiquement à la suivante.</div>
