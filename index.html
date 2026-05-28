@@ -2207,7 +2207,7 @@ function toggleExtraRole(name){
 }
 function setMode(m){
   S.mode=m;stopAll();S.revealed=new Set();saveSettings();
-  $('mode-badge').textContent=MODES.find(x=>x.id===m)?.label.toUpperCase()||m;
+  const mb=$('mode-badge');if(mb)mb.textContent=MODES.find(x=>x.id===m)?.label.toUpperCase()||m;
   renderModes();renderContent();updateBottomBar();
   // Afficher la section blanc progressif seulement en mode blanc
   $('sb-blanc').style.display=m==='blanc'?'block':'none';
