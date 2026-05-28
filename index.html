@@ -505,8 +505,7 @@ body.dark-mode .souffleur-hint{background:#2A2420}
 
 /* ── FAB PLAY ── */
 .fab-play{
-  position:fixed;bottom:52px;right:.85rem;
-  width:52px;height:52px;border-radius:50%;
+  position:fixed;bottom:62px;right:3.5rem;  width:52px;height:52px;border-radius:50%;
   background:var(--red);color:var(--paper);
   border:2px solid var(--ink);
   display:none;align-items:center;justify-content:center;
@@ -2366,7 +2365,7 @@ function renderScript(){
     const cls=['s-line',cur?'current':'',isMe?'is-me':'',bm?'bookmarked':'',note?'has-note':''].filter(Boolean).join(' ');
     html+=`<div class="${cls}" id="sl-${di}" data-di="${di}" onclick="jumpLine(${di})"
          ontouchstart="this._lpt=Date.now()"
-         ontouchend="if(Date.now()-this._lpt>500){event.preventDefault();showLineMenu(${di});}"
+         ontouchend="if(Date.now()-this._lpt>900){event.preventDefault();showLineMenu(${di});}"
           oncontextmenu="event.preventDefault();showLineMenu(${di})" ${note?`style="${noteBorder}"`:''}>
       <div class="s-role" style="color:${color}">${esc(line.role)}</div>
       ${noteDot}${textHtml}</div>`;
