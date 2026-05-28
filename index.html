@@ -4676,7 +4676,7 @@ function showRoleLayer(){
   layer.id='role-layer';
 
  const chipsHTML = S.play.roles.map(r=>`
-    <div class="role-chip ${S.myRole===r.name?'selected':''}"
+    <div class="role-chip ${S.myRoles.includes(r.name)?'selected':''}"
       onclick="toggleRoleFromLayer('${esc(r.name)}')"
       data-role="${esc(r.name)}">
       <div class="role-chip-dot" style="background:${r.color}"></div>
