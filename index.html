@@ -4675,9 +4675,9 @@ function showRoleLayer(){
   layer.className='role-layer';
   layer.id='role-layer';
 
-  const chipsHTML = S.play.roles.slice(0,8).map(r=>`
+ const chipsHTML = S.play.roles.map(r=>`
     <div class="role-chip ${S.myRole===r.name?'selected':''}"
-      onclick="selectRoleFromLayer('${esc(r.name)}')"
+      onclick="toggleRoleFromLayer('${esc(r.name)}')"
       data-role="${esc(r.name)}">
       <div class="role-chip-dot" style="background:${r.color}"></div>
       <span class="role-chip-name">${esc(r.name)}</span>
@@ -4699,23 +4699,26 @@ function showRoleLayer(){
   document.body.appendChild(layer);
 }
 
+function toggleRoleFromLayer(name){
+  if(!S._pendingRoles) S._pendingRoles = new Set(S.myRoles);
+  if(S._pendingRoles.has(name)) S._pendingRoles.delete(name);
+  else S._pendingRoles.add(name);
+  if(S._pendingRoles.size===0) S._pendingRoles.add(name);
+  document.querySelectorAll('.role-chip').forEach(c=>{
+    c.classList.toggle('selected', S._pendingRoles.has(c.dataset.role));
+  });
+  const btn=$('role-confirm-btn');
+  const names=[...S._pendingRoles];
+  if(btn) btn.textContent=`✓ Commencer — ${names.length===1?names[0]:names.length+' rôles'}`;
+}
+
 function selectRoleFromLayer(name){
-  // Mettre à jour visuellement
   document.querySelectorAll('.role-chip').forEach(c=>{
     c.classList.toggle('selected', c.dataset.role===name);
   });
-  // Mettre à jour le bouton confirm
   const btn=$('role-confirm-btn');
   if(btn) btn.textContent=`✓ Commencer — ${name}`;
-  // Pré-sélectionner
   S._pendingRole=name;
-}
-
-function confirmRoleLayer(){
-  const name=S._pendingRole||S.myRole||S.play?.roles[0]?.name;
-  if(name) selectRole(name);
-  closeRoleLayer();
-  switchTab('texte');
 }
 
 function closeRoleLayer(){
