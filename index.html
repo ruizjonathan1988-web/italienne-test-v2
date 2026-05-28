@@ -4947,13 +4947,7 @@ function renderSettingsTab(tab){
           <div class="mode-chip ${_isModeActive(m.id)?'active':''}"
             onclick="setModeFromSettings('${m.id}')">
             <span class="mode-chip-ico">${m.icon}</span>
-            <div style="display:flex;align-items:center;gap:4px;flex:1">
-  <span class="mode-chip-lbl" style="flex:1">${m.label}</span>
-  <span onclick="event.stopPropagation();var d=this.parentNode.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'"
-    style="font-size:.7rem;color:var(--ink-4);cursor:pointer">ⓘ</span>
-</div>
-</div>
-<div style="display:none;grid-column:1/-1;font-family:'Courier Prime',monospace;font-size:.55rem;color:var(--ink-3);padding:4px 6px;background:var(--paper-d);border-radius:2px;margin-top:-4px">${m.desc}</div>
+            <span class="mode-chip-lbl">${m.label}</span>
           </div>`).join('')}
       </div>
 
