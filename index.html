@@ -4699,6 +4699,12 @@ function showRoleLayer(){
   document.body.appendChild(layer);
 }
 
+function closeRoleLayer(){
+  const layer=$('role-layer');
+  if(layer) layer.remove();
+  S._pendingRole=null;
+  S._pendingRoles=null;
+}
 function toggleRoleFromLayer(name){
   if(!S._pendingRoles) S._pendingRoles = new Set(S.myRoles);
   if(S._pendingRoles.has(name)) S._pendingRoles.delete(name);
@@ -4711,23 +4717,21 @@ function toggleRoleFromLayer(name){
   const names=[...S._pendingRoles];
   if(btn) btn.textContent=`✓ Commencer — ${names.length===1?names[0]:names.length+' rôles'}`;
 }
-
-function selectRoleFromLayer(name){
-  document.querySelectorAll('.role-chip').forEach(c=>{
-    c.classList.toggle('selected', c.dataset.role===name);
-  });
-  const btn=$('role-confirm-btn');
-  if(btn) btn.textContent=`✓ Commencer — ${name}`;
-  S._pendingRole=name;
-}
-
-function closeRoleLayer(){
-  const layer=$('role-layer');
-  if(layer) layer.remove();
+function confirmRoleLayer(){
+  if(S._pendingRoles&&S._pendingRoles.size>0){
+    S.myRoles=[...S._pendingRoles];
+    S.myRole=S.myRoles[0];
+    S._pendingRoles=null;
+  } else {
+    const name=S._pendingRole||S.myRole||S.play?.roles[0]?.name;
+    if(name){S.myRole=name;S.myRoles=[name];}
+  }
   S._pendingRole=null;
+  renderRoles();renderContent();
+  closeRoleLayer();
 }
+// ════ MENU SCÈNES DÉROULANT ════ 
 
-// ════ MENU SCÈNES DÉROULANT ════
 function toggleSceneDropdown(){
   const existing=$('scene-dropdown');
   if(existing){ existing.remove(); return; }
