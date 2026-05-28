@@ -9,7 +9,8 @@
 <title>Italiennes</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
-<style>
+
+  <style>
 :root{
   --paper:#F4EEE4;--paper-d:#EBE3D4;--paper-dd:#DDD3BF;
   --ink:#18120A;--ink-2:#3A2A18;--ink-3:#7A6248;--ink-4:#AE9A80;
@@ -714,6 +715,20 @@ body.dark-mode .souffleur-hint{background:#2A2420}
 .play-header .icon-btn:nth-child(2){display:none}
 .play-header .mode-badge{display:none}
 body.has-tabs .play-header{padding:.35rem .68rem}
+
+    /* ── MODE CUE / FLASH ── */
+.cue-view{flex:1;display:flex;flex-direction:column;padding:1.2rem .9rem;gap:1rem;overflow-y:auto}
+.cue-counter{font-family:'Courier Prime',monospace;font-size:.65rem;color:var(--ink-4);text-align:center}
+.cue-amorce{background:var(--paper-d);border-left:3px solid var(--line);padding:.6rem .8rem;border-radius:2px}
+.cue-amorce-role{font-family:'Courier Prime',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-4);margin-bottom:.2rem}
+.cue-amorce-text{font-family:'IM Fell English',serif;font-style:italic;font-size:.88rem;color:var(--ink-3)}
+.cue-replique{padding:.8rem;border:1.5px solid var(--line);border-radius:4px;cursor:pointer;min-height:80px;display:flex;align-items:center;justify-content:center;background:var(--paper)}
+.cue-replique.hidden{background:var(--ink-3);border-color:var(--ink-3)}
+.cue-replique-role{font-family:'IM Fell English',serif;font-size:.9rem;font-weight:700;margin-bottom:.3rem}
+.cue-replique-text{font-family:'IM Fell English',serif;font-size:1rem;line-height:1.65;color:var(--ink-2)}
+.cue-replique-hint{font-family:'Courier Prime',monospace;font-size:.72rem;color:var(--paper);text-align:center}
+.cue-actions{display:flex;gap:.5rem}
+    
 </style>
 <!-- Azure Speech SDK -->
 <script defer src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
@@ -914,8 +929,10 @@ body.has-tabs .play-header{padding:.35rem .68rem}
           <div class="k-current" id="k-current"></div>
           <div class="k-next" id="k-next"></div>
         </div>
+        <div class="cue-view" id="cue-view" style="display:none"></div>
       </div>
     </main>
+    
   </div>
   <!-- ══ NOUVELLE BOTTOM BAR — 4 ONGLETS ══ -->
 <div class="tab-bar" id="tab-bar" style="display:none">
@@ -2273,6 +2290,7 @@ function _nav(){
   updateProg();updateSceneHighlight();
   if(S.mode==='souffleur'&&S._myTurnPending)resetSouffleur();
   savePos();
+  if(S.mode==='amorce'||S.mode==='aleatoire') renderCueView();
   updatePrevContext();
   renderScenePips();
 }
@@ -2307,7 +2325,11 @@ function renderContent(){
   $('scene-bar-new').style.display='flex';
   $('scene-nav-bar').style.display='none';
   $('karaoke-view').classList.toggle('show',kar);
+ const isCue=S.mode==='amorce'||S.mode==='aleatoire';
+  $('cue-view').style.display=isCue?'flex':'none';
+  $('script-view').style.display=isCue?'none':kar?'none':'block';
   if(kar)renderKaraoke();
+  else if(isCue)renderCueView();
   else{renderScript();renderScrubber();updateScrubberCursor();scrollToCur();updateSceneHighlight();}
   updateProg();
   updatePrevContext();
@@ -5163,7 +5185,47 @@ function setModeFromSettings(modeId){
   setMode(modeId);
   switchTab('texte');
 }
-  
+// ════ MODE CUE / FLASH ════
+let _cueRevealed=false;
+function renderCueView(){
+  const el=$('cue-view');if(!el||!S.play)return;
+  _cueRevealed=false;
+  const cur=S.dialogues[S.lineIdx];if(!cur)return;
+  const prev=S.dialogues[S.lineIdx-1];
+  const roleMap={};S.play.roles.forEach(r=>{roleMap[r.name]=r.color;});
+  const myLines=S.dialogues.filter(d=>isMyLine(d.role));
+  const myIdx=myLines.findIndex(d=>d.dIdx===cur.dIdx);
+  el.innerHTML=`
+    <div class="cue-counter">${S.mode==='aleatoire'?'⚡ Flash':'🎯 Cue'} · ${myIdx+1}/${myLines.length}</div>
+    ${prev?`<div class="cue-amorce">
+      <div class="cue-amorce-role">${esc(prev.role)}</div>
+      <div class="cue-amorce-text">…${esc(prev.text.split(/\s+/).slice(-8).join(' '))}</div>
+    </div>`:`<div class="cue-amorce"><div class="cue-amorce-text" style="color:var(--amber)">▸ Début de scène</div></div>`}
+    <div class="cue-replique hidden" id="cue-rep" onclick="revealCueReplique()">
+      <div class="cue-replique-hint">Tap pour révéler ta réplique</div>
+    </div>
+    <div class="cue-actions">
+      <button class="btn" style="flex:1" onclick="navigate(-1)">← Préc.</button>
+      ${S.mode==='aleatoire'
+        ?`<button class="btn primary" style="flex:1" onclick="jumpRandom()">⚡ Aléatoire</button>`
+        :`<button class="btn primary" style="flex:1" onclick="navigate(1)">Suiv. →</button>`
+      }
+    </div>`;
+}
+function revealCueReplique(){
+  if(_cueRevealed)return;
+  _cueRevealed=true;
+  const cur=S.dialogues[S.lineIdx];if(!cur)return;
+  const roleMap={};S.play.roles.forEach(r=>{roleMap[r.name]=r.color;});
+  const rep=$('cue-rep');if(!rep)return;
+  rep.classList.remove('hidden');
+  rep.onclick=null;
+  rep.innerHTML=`
+    <div style="width:100%">
+      <div class="cue-replique-role" style="color:${roleMap[cur.role]||'var(--amber)'}">${esc(cur.role)}</div>
+      <div class="cue-replique-text">${esc(cur.text)}</div>
+    </div>`;
+}  
 
 // ════ MENU CONTEXTUEL RÉPLIQUE ════
 function showLineMenu(di){
