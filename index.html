@@ -1800,6 +1800,7 @@ const S={
   voiceProfiles:{},    // role → {pitch, rate}
   myLineBehavior:'skip',
   loopActive:false,
+  reduceListening:false,
   autoChain:false,   // enchaîner automatiquement sur mon tour
   blancLevel:0, // 0=visible, 1=75%, 2=50%, 3=25%, 4=caché
   notes:{}, // {dIdx: {text, color}}
@@ -2602,9 +2603,19 @@ function playStep(){
   const isMe=isMyLine(cur.role);
   const lim=parseInt($('line-limit')?.value||0);
 
-  if(!isMe){
+if(!isMe){
+    // Réduire l'écoute — sauter vers l'amorce si partenaire loin
+    if(S.reduceListening){
+      const nextMyIdx=S.dialogues.findIndex((d,i)=>i>S.lineIdx&&S.myRoles.includes(d.role));
+      const gap=nextMyIdx-S.lineIdx;
+      if(nextMyIdx>0&&gap>3){
+        S.lineIdx=Math.max(S.lineIdx,nextMyIdx-2);
+        _nav();setTimeout(playStep,100);return;
+      }
+    }
     // Réplique d'un partenaire → TTS la lit
     setHeaderSpeaking(cur.role);
+
     TTS.speakRole(cur.text,cur.role,{limit:lim,onend:()=>{
       resetHeader();
       if(!S.isPlaying)return;
@@ -4939,7 +4950,14 @@ function renderSettingsTab(tab){
         </div>
       </div>
 
-  <div class="settings-section-label">Lecture automatique</div>
+<div class="settings-section-label">Lecture automatique</div>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Réduire l'écoute entre mes répliques</div>
+          <div class="settings-row-sub">Saute automatiquement les passages qui ne concernent pas votre rôle.</div>
+        </div>
+        <div class="sw ${S.reduceListening?'on':'off'}" onclick="S.reduceListening=!S.reduceListening;saveSettings();renderSettingsTab('session')"></div>
+      </div>
       <div class="settings-row">
         <div class="settings-row-info">
           <div class="settings-row-label">Enchaîner automatiquement</div>
@@ -4971,7 +4989,7 @@ function renderSettingsTab(tab){
         <div class="sw on"></div>
       </div>
 
-      <div class="settings-section-label">Vitesse & délais</div>
+      <div class="settings-section-label">Vitesse & délais</div>  
       <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.3rem">
         <div style="display:flex;justify-content:space-between;width:100%">
           <div class="settings-row-label">Vitesse des voix</div>
