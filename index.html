@@ -4727,8 +4727,12 @@ function confirmRoleLayer(){
     if(name){S.myRole=name;S.myRoles=[name];}
   }
   S._pendingRole=null;
-  renderRoles();renderContent();
+  S.revealed=new Set();
+  saveSettings();
+  renderRoles();
+  renderContent();
   closeRoleLayer();
+  toast('Rôle : '+S.myRoles.join(', '));
 }
 // ════ MENU SCÈNES DÉROULANT ════ 
 
