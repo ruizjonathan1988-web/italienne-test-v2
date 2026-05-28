@@ -5161,11 +5161,9 @@ function setModeFromSettings(modeId){
   if(modeId==='lettres'){openLettres();return;}
   if(modeId==='quiz'){openQuiz();return;}
   setMode(modeId);
-  // Mettre à jour visuellement les chips sans rerendre tout
-  document.querySelectorAll('.mode-chip').forEach(el=>{
-    el.classList.toggle('active', el.querySelector('.mode-chip-lbl')?.textContent===ALL_MODES?.find(m=>m.id===modeId)?.label);
-  });
+  if(_currentTab!=='texte') switchTab('texte');
 }
+  
 
 // ════ MENU CONTEXTUEL RÉPLIQUE ════
 function showLineMenu(di){
