@@ -515,6 +515,10 @@ body.dark-mode .souffleur-hint{background:#2A2420}
 }
 .fab-play.show{display:flex}
 .fab-play.playing{background:var(--amber)}
+  @keyframes fabPulse{
+  0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(138,24,24,.35)}
+  50%{transform:scale(1.08);box-shadow:0 4px 24px rgba(138,24,24,.6)}
+}
 
 /* ── BARRE SCÈNE NOUVELLE ── */
 .scene-bar-new{
@@ -2043,6 +2047,13 @@ updateFabPlay();
 if(!S.myRole||S.myRole===S.play.roles[0]?.name){
   setTimeout(showRoleLayer, 400);
 }
+  // Tooltip onboarding première fois
+if(!localStorage.getItem('it.onboarded')){
+  setTimeout(()=>{
+    toast('› pour passer à la réplique suivante · appui long sur une réplique pour plus d\'options');
+    localStorage.setItem('it.onboarded','1');
+  }, 3000);
+}
   $('mode-badge').textContent=MODES.find(m=>m.id===S.mode)?.label.toUpperCase()||'LECTURE';
   $('loop-badge').classList.remove('show');
   renderSidebar();renderContent();updateBottomBar();updateAutochainUI();
@@ -2364,8 +2375,7 @@ function renderScript(){
     const cls=['s-line',cur?'current':'',isMe?'is-me':'',bm?'bookmarked':'',note?'has-note':''].filter(Boolean).join(' ');
     html+=`<div class="${cls}" id="sl-${di}" data-di="${di}" onclick="jumpLine(${di})"
         ontouchstart="this._lpt=Date.now()"
-   ontouchend="if(Date.now()-this._lpt>700&&${di}===S.lineIdx){event.preventDefault();showLineMenu(${di});}"
-         ontouchend="if(Date.now()-this._lpt>900){event.preventDefault();showLineMenu(${di});}"
+        ontouchend="if(Date.now()-this._lpt>700&&${di}===S.lineIdx){event.preventDefault();showLineMenu(${di});}"
           oncontextmenu="event.preventDefault();showLineMenu(${di})" ${note?`style="${noteBorder}"`:''}>
       <div class="s-role" style="color:${color}">${esc(line.role)}</div>
       ${noteDot}${textHtml}</div>`;
@@ -2498,6 +2508,7 @@ function _advanceAndPlay(){
 function startPlay(){
   S.isPlaying=true;
   const bp=$('bb-play');if(bp){bp.classList.add('active');bp.textContent='⏸';}
+  const fab=$('fab-play');if(fab){fab.textContent='⏸';fab.style.animation='';}
   playStep();
   updateFabPlay();
 }
@@ -2568,6 +2579,8 @@ function startAutoChainCountdown(onDone){
 
 function _pauseMyTurn(afterPending,msg){
   S.isPlaying=false;
+  const fab=$('fab-play');
+  if(fab){fab.textContent='›';fab.style.animation='fabPulse 1s ease-in-out infinite';}
   TTS.stop();
   const bp=$('bb-play');if(bp){bp.classList.remove('active');bp.textContent='▶';}
   S._myTurnPending=true;
@@ -2653,7 +2666,7 @@ if(!isMe){
     setHeaderSpeaking(cur.role);
     TTS.speakRole(cur.text,cur.role,{onend:()=>{
       resetHeader();
-      _pauseMyTurn(false,'À vous — ▶ pour continuer');
+      _pauseMyTurn(false,'À vous — › pour continuer');
     }});
 
   } else if(beh==='before_after'){
@@ -2661,16 +2674,16 @@ if(!isMe){
     setHeaderSpeaking(cur.role);
     TTS.speakRole(cur.text,cur.role,{onend:()=>{
       resetHeader();
-      _pauseMyTurn(true,'À vous — ▶ pour entendre à nouveau');
+      _pauseMyTurn(true,'À vous — › pour entendre à nouveau');
     }});
 
   } else if(beh==='after'){
     // Pause directe → ▶ lit ma réplique PUIS avance
-    _pauseMyTurn(true,'À vous — ▶ pour entendre après');
+    _pauseMyTurn(true,'À vous — › pour entendre après');
 
   } else {
     // skip (défaut) : pause directe → ▶ pour avancer
-    _pauseMyTurn(false,'À vous — ▶ pour continuer');
+    _pauseMyTurn(false,'À vous — › pour continuer');
   }
 }
 function setHeaderSpeaking(role){const c=S.play?.roles.find(r=>r.name===role)?.color||'#8A1818';$('play-title-hd').innerHTML=`<span style="color:${c}">${esc(role)}</span><span class="speaking-ind"><span></span><span></span><span></span></span>`;}
@@ -4177,11 +4190,12 @@ function clearAllRecordings(){
 
 
 // ════ OUTIL 9 : GUIDE DE BIENVENUE ════
-const WELCOME_STEPS=[
+ const WELCOME_STEPS=[
   {icon:'📂',title:'Importe ton script',body:'Appuie sur <strong>＋ Importer</strong> et choisis un fichier PDF, DOCX ou TXT — ou colle directement le texte. L\'app détecte automatiquement les personnages et les scènes.'},
-  {icon:'🎭',title:'Choisis ton rôle',body:'Ouvre le menu <strong>☰</strong> et tap sur ton personnage dans <em>Mon rôle</em>. Tes répliques apparaissent surlignées. Tu peux aussi activer plusieurs rôles avec un appui long.'},
-  {icon:'▶',title:'Lance l\'italienne',body:'Appuie sur <strong>▶</strong> — l\'app lit les répliques des partenaires. Sur <strong>Mon texte (TTS)</strong>, choisis <em>Silence</em> pour jouer seul, ou <em>Avant</em> pour entendre ta réplique avant de la dire.<br>Active <strong>Auto-enchaîner</strong> pour une flow continue.'},
-  {icon:'🛠️',title:'Tous les outils',body:'<strong>🎮 Quiz</strong> pour mémoriser · <strong>🧵 Fil rouge</strong> pour tes répliques seules · <strong>🌙 Mode sombre</strong> pour les coulisses · <strong>👶 Mode enfant</strong> pour agrandir l\'interface · <strong>00:00</strong> pour le minuteur de scène.'},
+  {icon:'🎭',title:'Choisis ton rôle',body:'À l\'ouverture d\'une pièce, une fenêtre te propose de choisir ton personnage. Tu peux en sélectionner <strong>plusieurs à la fois</strong>. Change de rôle à tout moment dans <strong>Réglages → Mon rôle</strong>.'},
+  {icon:'▶',title:'Lance la répétition',body:'Appuie sur le bouton <strong>▶</strong> en bas à droite — l\'app lit les répliques des partenaires et s\'arrête sur les tiennes. Le bouton devient <strong>›</strong> quand c\'est ton tour : appuie dessus pour passer à la suite.'},
+  {icon:'✋',title:'Ton tour !',body:'Quand le bouton affiche <strong>›</strong>, c\'est à toi de réciter ta réplique. Appuie sur <strong>›</strong> pour continuer. Dans <strong>Réglages → Lire mes répliques</strong>, choisis si tu veux entendre ta réplique avant ou après l\'avoir dite.'},
+  {icon:'🛠️',title:'Tous les outils',body:'<strong>Appui long</strong> sur une réplique pour la marquer, ajouter une note ou l\'écouter. <strong>Réglages</strong> pour changer le mode, la vitesse, activer l\'auto-enchaînement. <strong>Marques</strong> pour retrouver tes répliques importantes.'},
 ];
 let _welcomeStep=0;
 function showWelcome(){
@@ -4668,8 +4682,15 @@ function switchTab(tab){
 function updateFabPlay(){
   const fab=$('fab-play');
   if(!fab) return;
-  fab.classList.toggle('playing', S.isPlaying);
-  fab.textContent = S.isPlaying ? '⏸' : '▶';
+  if(S._myTurnPending){
+    fab.textContent='›';
+    fab.style.animation='fabPulse 1s ease-in-out infinite';
+    fab.classList.remove('playing');
+  } else {
+    fab.textContent=S.isPlaying?'⏸':'▶';
+    fab.style.animation='';
+    fab.classList.toggle('playing',S.isPlaying);
+  }
 }
 
 // ════ COUCHE CHOIX RÔLE ════
@@ -4868,6 +4889,12 @@ function renderMarques(tab){
 // ════ ONGLET RÉGLAGES ════
 let _settingsTab='session';
 
+let _settingsDebounce=null;
+function renderSettingsTabDebounced(tab){
+  clearTimeout(_settingsDebounce);
+  _settingsDebounce=setTimeout(()=>renderSettingsTab(tab),150);
+}
+
 function switchSettingsTab(tab){
   _settingsTab=tab;
   ['session','affichage','technique'].forEach(t=>{
@@ -4889,17 +4916,17 @@ function renderSettingsTab(tab){
   const body=$('settings-body');
   if(!body) return;
 
-  const ALL_MODES=[
-    {id:'lecture',icon:'📖',label:'Lecture'},
-    {id:'masquer',icon:'🙈',label:'Masquer'},
-    {id:'blanc',icon:'🌫️',label:'Blanc'},
-    {id:'karaoke',icon:'🎬',label:'Karaoké'},
-    {id:'souffleur',icon:'🤫',label:'Souffleur'},
-    {id:'amorce',icon:'🎯',label:'Amorce'},
-    {id:'aleatoire',icon:'🎲',label:'Aléatoire'},
-    {id:'fil-rouge',icon:'🧵',label:'Fil rouge'},
-    {id:'lettres',icon:'🔡',label:'Lettres'},
-    {id:'quiz',icon:'🎮',label:'Quiz'},
+ const ALL_MODES=[
+    {id:'lecture',icon:'📖',label:'Lecture',desc:'Lit les partenaires, pause sur tes répliques'},
+    {id:'masquer',icon:'🙈',label:'Masquer',desc:'Tes répliques cachées, tap pour révéler'},
+    {id:'blanc',icon:'🌫️',label:'Blanc',desc:'Le texte disparaît progressivement'},
+    {id:'karaoke',icon:'🎬',label:'Karaoké',desc:'Ligne par ligne en plein écran'},
+    {id:'souffleur',icon:'🤫',label:'Souffleur',desc:'Indice automatique après le délai'},
+    {id:'amorce',icon:'🎯',label:'Amorce',desc:'Seulement le début de ta réplique'},
+    {id:'aleatoire',icon:'🎲',label:'Aléatoire',desc:'Tes répliques dans le désordre'},
+    {id:'fil-rouge',icon:'🧵',label:'Fil rouge',desc:'Tes répliques seules, sans partenaires'},
+    {id:'lettres',icon:'🔡',label:'Lettres',desc:'Devine ta réplique lettre par lettre'},
+    {id:'quiz',icon:'🎮',label:'Quiz',desc:'Complète les mots manquants'},
   ];
 
   if(tab==='session'){
@@ -4914,13 +4941,18 @@ function renderSettingsTab(tab){
         <span style="font-family:'Courier Prime',monospace;font-size:.75rem;color:var(--red);cursor:pointer" onclick="showRoleLayer()">${esc(S.myRole||'—')} ›</span>
       </div>
 
-      <div class="settings-section-label">Mode de répétition</div>
+     <div class="settings-section-label">Mode de répétition</div>
       <div class="mode-grid">
         ${ALL_MODES.map(m=>`
           <div class="mode-chip ${_isModeActive(m.id)?'active':''}"
             onclick="setModeFromSettings('${m.id}')">
             <span class="mode-chip-ico">${m.icon}</span>
-            <span class="mode-chip-lbl">${m.label}</span>
+            <div style="display:flex;align-items:center;gap:4px;width:100%">
+  <span class="mode-chip-lbl" style="flex:1">${m.label}</span>
+  <span onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'"
+    style="font-size:.7rem;color:var(--ink-4);cursor:pointer;flex-shrink:0">ⓘ</span>
+</div>
+<div style="display:none;font-family:'Courier Prime',monospace;font-size:.55rem;color:var(--ink-3);line-height:1.4;margin-top:3px;padding-top:3px;border-top:1px solid var(--line-l)">${m.desc}</div>
           </div>`).join('')}
       </div>
 
@@ -4944,7 +4976,7 @@ function renderSettingsTab(tab){
         <div class="segment" style="width:100%">
           ${['skip','before','after','before_after'].map((v,i)=>`
             <div class="seg-opt ${S.myLineBehavior===v?'active':''}"
-              onclick="S.myLineBehavior='${v}';saveSettings();renderSettingsTab('session')">
+              onclick="S.myLineBehavior='${v}';saveSettings();renderSettingsTabDebounced('session')">
               ${['Non','Avant','Après','Les deux'][i]}
             </div>`).join('')}
         </div>
@@ -4956,14 +4988,14 @@ function renderSettingsTab(tab){
           <div class="settings-row-label">Réduire l'écoute entre mes répliques</div>
           <div class="settings-row-sub">Saute automatiquement les passages qui ne concernent pas votre rôle.</div>
         </div>
-        <div class="sw ${S.reduceListening?'on':'off'}" onclick="S.reduceListening=!S.reduceListening;saveSettings();renderSettingsTab('session')"></div>
+        <div class="sw ${S.reduceListening?'on':'off'}" onclick="S.reduceListening=!S.reduceListening;saveSettings();renderSettingsTabDebounced('session')"></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-info">
           <div class="settings-row-label">Enchaîner automatiquement</div>
           <div class="settings-row-sub">Une fois le délai écoulé, passer automatiquement à la suivante.</div>
         </div>
-        <div class="sw ${S.autoChain?'on':'off'}" onclick="toggleAutoChain();renderSettingsTab('session')"></div>
+        <div class="sw ${S.autoChain?'on':'off'}" onclick="toggleAutoChain();renderSettingsTabDebounced('session')"></div>
       </div>
       ${S.autoChain?`
       <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.3rem">
@@ -4979,7 +5011,7 @@ function renderSettingsTab(tab){
           <div class="settings-row-label">Boucle</div>
           <div class="settings-row-sub">Revient au début en fin de pièce</div>
         </div>
-        <div class="sw ${S.loopActive?'on':'off'}" onclick="toggleLoop();renderSettingsTab('session')"></div>
+        <div class="sw ${S.loopActive?'on':'off'}" onclick="toggleLoop();renderSettingsTabDebounced('session')"></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-info">
