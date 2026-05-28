@@ -2071,7 +2071,7 @@ if(!localStorage.getItem('it.onboarded')){
     localStorage.setItem('it.onboarded','1');
   }, 3000);
 }
-  $('mode-badge').textContent=MODES.find(m=>m.id===S.mode)?.label.toUpperCase()||'LECTURE';
+  const mb=$('mode-badge');if(mb)mb.textContent=MODES.find(m=>m.id===S.mode)?.label.toUpperCase()||'LECTURE';
   $('loop-badge').classList.remove('show');
   renderSidebar();renderContent();updateBottomBar();updateAutochainUI();
 
