@@ -2750,7 +2750,7 @@ function resetSouffleur(){clearSouffleur();if(S._myTurnPending&&S.mode==='souffl
 // ════ MODE BOUCLE ════
 function toggleLoop(){
   S.loopActive=!S.loopActive;
-  $('bb-loop').classList.toggle('active',S.loopActive);
+  const bb=$('bb-loop');if(bb)bb.classList.toggle('active',S.loopActive);
   $('loop-badge').classList.toggle('show',S.loopActive);
   toast(S.loopActive?'🔁 Boucle activée':'Boucle désactivée');
 }
@@ -4947,12 +4947,13 @@ function renderSettingsTab(tab){
           <div class="mode-chip ${_isModeActive(m.id)?'active':''}"
             onclick="setModeFromSettings('${m.id}')">
             <span class="mode-chip-ico">${m.icon}</span>
-            <div style="display:flex;align-items:center;gap:4px;width:100%">
+            <div style="display:flex;align-items:center;gap:4px;flex:1">
   <span class="mode-chip-lbl" style="flex:1">${m.label}</span>
-  <span onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'"
-    style="font-size:.7rem;color:var(--ink-4);cursor:pointer;flex-shrink:0">ⓘ</span>
+  <span onclick="event.stopPropagation();var d=this.parentNode.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'"
+    style="font-size:.7rem;color:var(--ink-4);cursor:pointer">ⓘ</span>
 </div>
-<div style="display:none;font-family:'Courier Prime',monospace;font-size:.55rem;color:var(--ink-3);line-height:1.4;margin-top:3px;padding-top:3px;border-top:1px solid var(--line-l)">${m.desc}</div>
+</div>
+<div style="display:none;grid-column:1/-1;font-family:'Courier Prime',monospace;font-size:.55rem;color:var(--ink-3);padding:4px 6px;background:var(--paper-d);border-radius:2px;margin-top:-4px">${m.desc}</div>
           </div>`).join('')}
       </div>
 
@@ -5176,7 +5177,7 @@ function setModeFromSettings(modeId){
   }
   setMode(modeId);
   // Aller dans l'onglet texte
-  switchTab('texte');
+  if(_currentTab!=='texte') switchTab('texte');
 }
 
 // ════ MENU CONTEXTUEL RÉPLIQUE ════
