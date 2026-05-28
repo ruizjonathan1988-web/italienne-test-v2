@@ -772,17 +772,14 @@ body.has-tabs .play-header{padding:.35rem .68rem}
 <!-- ══ PLAY ══ -->
 <div id="screen-play" class="screen">
   <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
-  <div class="play-header">
-    <button class="icon-btn" onclick="closeSidebar();stopAll();showScreen('library')">←</button>
-    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+ <div class="play-header">
+    <button class="icon-btn" onclick="closeSidebar();stopAll();showScreen('library');document.body.classList.remove('has-tabs')">←</button>
     <span class="play-title-hd" id="play-title-hd"></span>
-    <span class="mode-badge" id="mode-badge">LECTURE</span>
-    <button class="icon-btn" id="btn-dark-mode" onclick="toggleDarkMode()" title="Mode sombre">🌙</button>
-    <button class="icon-btn" id="btn-kid-mode" onclick="toggleKidMode()" title="Mode enfant">👶</button>
     <button class="icon-btn" onclick="toggleSearch()" title="Rechercher">🔍</button>
-    <button class="icon-btn" onclick="openEditor()" title="Éditer">✏️</button>
-    <button class="icon-btn" onclick="showStats()" title="Stats">📊</button>
+    <button class="icon-btn" id="btn-dark-mode" onclick="toggleDarkMode()" title="Mode sombre" style="display:none">🌙</button>
+    <button class="icon-btn" id="btn-kid-mode" onclick="toggleKidMode()" title="Mode enfant" style="display:none">👶</button>
   </div>
+
   <!-- Barre de recherche -->
   <div id="search-bar" style="display:none;padding:.4rem .8rem;border-bottom:1px solid var(--line);background:var(--paper-d);flex-shrink:0;align-items:center;gap:.5rem">
     <input type="text" id="search-input" class="txt-input" placeholder="Rechercher dans le script…" style="flex:1;font-size:.85rem;padding:.32rem .55rem" oninput="doSearch(this.value)">
