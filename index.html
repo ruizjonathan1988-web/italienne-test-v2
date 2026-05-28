@@ -2268,7 +2268,10 @@ function jumpScene(si){const fi=S.dialogues.findIndex(d=>d.scIdx===si);const fi2
 function jumpLine(di){S.lineIdx=di;_nav();}
 function jumpRandom(){
   if(!S.dialogues.length)return;
-  S.lineIdx=Math.floor(Math.random()*S.dialogues.length);
+  const myLines=S.dialogues.filter(d=>isMyLine(d.role));
+  if(!myLines.length)return;
+  const pick=myLines[Math.floor(Math.random()*myLines.length)];
+  S.lineIdx=pick.dIdx;
   _navHistory.push(S.lineIdx);
   if(_navHistory.length>50)_navHistory.shift(); // limiter la taille
   _navFuture=[];
@@ -5190,7 +5193,12 @@ let _cueRevealed=false;
 function renderCueView(){
   const el=$('cue-view');if(!el||!S.play)return;
   _cueRevealed=false;
-  const cur=S.dialogues[S.lineIdx];if(!cur)return;
+ const cur=S.dialogues[S.lineIdx];if(!cur)return;
+  // Si pas ma réplique, sauter à la suivante qui l'est
+  if(!isMyLine(cur.role)){
+    const nextMine=S.dialogues.findIndex((d,i)=>i>S.lineIdx&&isMyLine(d.role));
+    if(nextMine>=0){S.lineIdx=nextMine;_nav();return;}
+  }
   const prev=S.dialogues[S.lineIdx-1];
   const roleMap={};S.play.roles.forEach(r=>{roleMap[r.name]=r.color;});
   const myLines=S.dialogues.filter(d=>isMyLine(d.role));
