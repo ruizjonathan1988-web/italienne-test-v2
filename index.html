@@ -1045,7 +1045,20 @@ body.has-tabs .play-header{padding:.35rem .68rem}
 </div>
 
 <!-- ══ ÉDITEUR ══ -->
+
 <div id="screen-editor" class="screen">
+  <div class="app-header">
+    <button class="icon-btn" id="btn-editor-back">←</button>
+    <h1 style="font-size:.98rem;flex:1">Corriger le script</h1>
+    <button class="btn primary" onclick="saveEditor()">✓ Sauvegarder</button>
+  </div>
+  <div class="editor-hint">
+    <span style="color:var(--red)">PERSO :</span> réplique &nbsp;·&nbsp;
+    <span style="color:var(--ink-3)">#</span>didascalie<span style="color:var(--ink-3)">#</span> &nbsp;·&nbsp;
+    <span style="color:var(--amber)">##</span>Titre de scène<span style="color:var(--amber)">##</span>
+  </div>
+  <textarea id="editor-area" spellcheck="false" placeholder="Chargement…"></textarea>
+</div>
 
 <!-- ══ MODAL NOTES ══ -->
 <div class="modal-bg" id="notes-modal" onclick="if(event.target===this)closeNote()">
@@ -1071,18 +1084,6 @@ body.has-tabs .play-header{padding:.35rem .68rem}
       </div>
     </div>
   </div>
-</div>
-  <div class="app-header">
-    <button class="icon-btn" id="btn-editor-back">←</button>
-    <h1 style="font-size:.98rem;flex:1">Corriger le script</h1>
-    <button class="btn primary" onclick="saveEditor()">✓ Sauvegarder</button>
-  </div>
-  <div class="editor-hint">
-    <span style="color:var(--red)">PERSO :</span> réplique &nbsp;·&nbsp;
-    <span style="color:var(--ink-3)">#</span>didascalie<span style="color:var(--ink-3)">#</span> &nbsp;·&nbsp;
-    <span style="color:var(--amber)">##</span>Titre de scène<span style="color:var(--amber)">##</span>
-  </div>
-  <textarea id="editor-area" spellcheck="false" placeholder="Chargement…"></textarea>
 </div>
 
 <!-- ══ STATS ══ -->
