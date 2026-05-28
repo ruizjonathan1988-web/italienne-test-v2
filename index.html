@@ -5157,21 +5157,14 @@ function _isModeActive(modeId){
 }
 
 function setModeFromSettings(modeId){
-  if(modeId==='fil-rouge'){
-    openFilRouge();
-    return;
-  }
-  if(modeId==='lettres'){
-    openLettres();
-    return;
-  }
-  if(modeId==='quiz'){
-    openQuiz();
-    return;
-  }
+  if(modeId==='fil-rouge'){openFilRouge();return;}
+  if(modeId==='lettres'){openLettres();return;}
+  if(modeId==='quiz'){openQuiz();return;}
   setMode(modeId);
-  // Aller dans l'onglet texte
-  if(_currentTab!=='texte') switchTab('texte');
+  // Mettre à jour visuellement les chips sans rerendre tout
+  document.querySelectorAll('.mode-chip').forEach(el=>{
+    el.classList.toggle('active', el.querySelector('.mode-chip-lbl')?.textContent===ALL_MODES?.find(m=>m.id===modeId)?.label);
+  });
 }
 
 // ════ MENU CONTEXTUEL RÉPLIQUE ════
