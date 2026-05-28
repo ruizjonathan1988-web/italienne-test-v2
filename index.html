@@ -4983,7 +4983,7 @@ function renderSettingsTab(tab){
           <div class="settings-row-label">Réduire l'écoute entre mes répliques</div>
           <div class="settings-row-sub">Saute automatiquement les passages qui ne concernent pas votre rôle.</div>
         </div>
-        <div class="sw ${S.reduceListening?'on':'off'}" onclick="S.reduceListening=!S.reduceListening;saveSettings();renderSettingsTabDebounced('session')"></div>
+        <div class="sw ${S.reduceListening?'on':'off'}" onclick="S.reduceListening=!S.reduceListening;saveSettings();this.classList.toggle('on',S.reduceListening);this.classList.toggle('off',!S.reduceListening)"></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-info">
@@ -5161,7 +5161,7 @@ function setModeFromSettings(modeId){
   if(modeId==='lettres'){openLettres();return;}
   if(modeId==='quiz'){openQuiz();return;}
   setMode(modeId);
-  if(_currentTab!=='texte') switchTab('texte');
+  switchTab('texte');
 }
   
 
